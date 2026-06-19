@@ -5,6 +5,7 @@ import {
   upsertDailyStat,
   getSettings
 } from './database'
+import { isAppLocked } from './limit-checker'
 import { format } from 'date-fns'
 import type { Settings } from '@shared/types'
 
@@ -124,6 +125,19 @@ async function tick() {
   }
 
   if (state.settings.blacklistedApps.includes(activeWindow.appName)) {
+    if (state.currentActivity) {
+      const now = Math.floor(Date.now() / 1000)
+      updateActivityEnd(
+        state.currentActivity.id,
+        now,
+        now - state.currentActivity.startTime
+      )
+      state.currentActivity = null
+    }
+    return
+  }
+
+  if (isAppLocked(activeWindow.appName)) {
     if (state.currentActivity) {
       const now = Math.floor(Date.now() / 1000)
       updateActivityEnd(

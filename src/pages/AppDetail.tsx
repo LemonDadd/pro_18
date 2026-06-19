@@ -30,6 +30,8 @@ export default function AppDetail() {
   const [limit, setLimit] = useState<any>(null)
   const [limitMinutes, setLimitMinutes] = useState(60)
   const [limitEnabled, setLimitEnabled] = useState(false)
+  const [limitAction, setLimitAction] = useState<'notify' | 'lock'>('notify')
+  const [lockDuration, setLockDuration] = useState(5)
 
   useEffect(() => {
     loadData()
@@ -50,6 +52,8 @@ export default function AppDetail() {
         setLimit(appLimit)
         setLimitMinutes(appLimit.dailyLimitMinutes)
         setLimitEnabled(appLimit.enabled)
+        setLimitAction(appLimit.action || 'notify')
+        setLockDuration(appLimit.lockDurationMinutes || 5)
       }
     }
     loadLimit()
@@ -76,8 +80,8 @@ export default function AppDetail() {
       appName,
       dailyLimitMinutes: limitMinutes,
       enabled: limitEnabled,
-      action: 'notify',
-      lockDurationMinutes: 5
+      action: limitAction,
+      lockDurationMinutes: lockDuration
     })
     await useAppStore.getState().fetchLimits()
     alert('限额已保存')
@@ -279,8 +283,8 @@ export default function AppDetail() {
 
       <div className="bg-white rounded-2xl p-6 shadow-sm">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">使用限额</h3>
-        <div className="flex items-end gap-4">
-          <div className="flex-1 max-w-xs">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div>
             <label className="block text-sm text-slate-600 mb-2">
               每日限额（分钟）
             </label>
@@ -292,24 +296,67 @@ export default function AppDetail() {
               min="1"
             />
           </div>
-          <div className="flex items-center gap-2 pb-2">
-            <input
-              type="checkbox"
-              id="limit-enabled"
-              checked={limitEnabled}
-              onChange={e => setLimitEnabled(e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded"
-            />
-            <label htmlFor="limit-enabled" className="text-sm text-slate-600">
-              启用限额
+          <div>
+            <label className="block text-sm text-slate-600 mb-2">
+              超时处理
             </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLimitAction('notify')}
+                className={`flex-1 py-2 text-sm rounded-lg border transition-colors ${
+                  limitAction === 'notify'
+                    ? 'border-blue-500 bg-blue-50 text-blue-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                仅通知
+              </button>
+              <button
+                onClick={() => setLimitAction('lock')}
+                className={`flex-1 py-2 text-sm rounded-lg border transition-colors ${
+                  limitAction === 'lock'
+                    ? 'border-red-500 bg-red-50 text-red-600'
+                    : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                }`}
+              >
+                强制休息
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleSaveLimit}
-            className="px-6 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            保存
-          </button>
+          {limitAction === 'lock' && (
+            <div>
+              <label className="block text-sm text-slate-600 mb-2">
+                休息时长（分钟）
+              </label>
+              <input
+                type="number"
+                value={lockDuration}
+                onChange={e => setLockDuration(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="1"
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="limit-enabled-detail"
+                checked={limitEnabled}
+                onChange={e => setLimitEnabled(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded"
+              />
+              <label htmlFor="limit-enabled-detail" className="text-sm text-slate-600">
+                启用
+              </label>
+            </div>
+            <button
+              onClick={handleSaveLimit}
+              className="px-6 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              保存
+            </button>
+          </div>
         </div>
       </div>
     </div>
