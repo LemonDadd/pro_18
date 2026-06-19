@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
+import Modal from '../components/Modal'
 
 export default function Settings() {
   const settings = useAppStore(s => s.settings)
@@ -293,88 +294,29 @@ export default function Settings() {
       </div>
 
       {showExportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">导出 CSV</h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1.5">开始日期</label>
-                  <input
-                    type="date"
-                    value={exportStartDate}
-                    onChange={e => setExportStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1.5">结束日期</label>
-                  <input
-                    type="date"
-                    value={exportEndDate}
-                    onChange={e => setExportEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="export-title"
-                  checked={recordTitle}
-                  onChange={e => setRecordTitle(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <label htmlFor="export-title" className="text-sm text-slate-600">
-                  包含窗口标题
-                </label>
-              </div>
-              <div className="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-700">
-                <span>快捷选择</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      const today = new Date()
-                      setExportEndDate(today.toISOString().split('T')[0])
-                      const d = new Date(today)
-                      d.setDate(today.getDate() - 6)
-                      setExportStartDate(d.toISOString().split('T')[0])
-                    }}
-                    className="px-2 py-1 bg-white rounded text-xs hover:bg-blue-100 transition-colors"
-                  >
-                    最近 7 天
-                  </button>
-                  <button
-                    onClick={() => {
-                      const today = new Date()
-                      setExportEndDate(today.toISOString().split('T')[0])
-                      const d = new Date(today)
-                      d.setDate(today.getDate() - 29)
-                      setExportStartDate(d.toISOString().split('T')[0])
-                    }}
-                    className="px-2 py-1 bg-white rounded text-xs hover:bg-blue-100 transition-colors"
-                  >
-                    最近 30 天
-                  </button>
-                </div>
-              </div>
+        <Modal title="导出 CSV" onClose={() => setShowExportModal(false)} onConfirm={confirmExportCSV} confirmText="导出">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-slate-600 mb-1.5">开始日期</label>
+              <input type="date" value={exportStartDate} onChange={e => setExportStartDate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowExportModal(false)}
-                className="flex-1 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={confirmExportCSV}
-                className="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
-              >
-                导出
-              </button>
+            <div>
+              <label className="block text-sm text-slate-600 mb-1.5">结束日期</label>
+              <input type="date" value={exportEndDate} onChange={e => setExportEndDate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
-        </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="export-title" checked={recordTitle} onChange={e => setRecordTitle(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
+            <label htmlFor="export-title" className="text-sm text-slate-600">包含窗口标题</label>
+          </div>
+          <div className="flex items-center justify-between px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-700">
+            <span>快捷选择</span>
+            <div className="flex gap-2">
+              <button onClick={() => { const today = new Date(); setExportEndDate(today.toISOString().split('T')[0]); const d = new Date(today); d.setDate(today.getDate() - 6); setExportStartDate(d.toISOString().split('T')[0]); }} className="px-2 py-1 bg-white rounded text-xs hover:bg-blue-100 transition-colors">最近 7 天</button>
+              <button onClick={() => { const today = new Date(); setExportEndDate(today.toISOString().split('T')[0]); const d = new Date(today); d.setDate(today.getDate() - 29); setExportStartDate(d.toISOString().split('T')[0]); }} className="px-2 py-1 bg-white rounded text-xs hover:bg-blue-100 transition-colors">最近 30 天</button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   )

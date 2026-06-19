@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
 import { formatDuration, formatDurationShort, getTodayString } from '../utils/format'
+import StatCard from '../components/StatCard'
+import ProgressBar from '../components/ProgressBar'
+import EmptyState from '../components/EmptyState'
 import {
   BarChart,
   Bar,
@@ -211,19 +214,12 @@ export default function Dashboard() {
                       {formatDurationShort(app.totalDuration)}
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full transition-all duration-500"
-                      style={{ width: `${(app.totalDuration / maxDuration) * 100}%` }}
-                    />
-                  </div>
+                  <ProgressBar value={app.totalDuration} max={maxDuration} />
                 </div>
               </div>
             ))}
             {topApps.length === 0 && (
-              <div className="text-center py-8 text-slate-400">
-                暂无数据，开始使用应用后会自动记录
-              </div>
+              <EmptyState message="暂无数据，开始使用应用后会自动记录" />
             )}
           </div>
         </div>
@@ -256,9 +252,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-slate-400">
-              暂无分类数据
-            </div>
+            <EmptyState message="暂无分类数据" className="h-64 flex items-center justify-center" />
           )}
           <div className="flex flex-wrap gap-3 mt-4">
             {categoryData.map((cat, index) => (
@@ -297,35 +291,6 @@ export default function Dashboard() {
               />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function StatCard({
-  title,
-  value,
-  subValue,
-  icon,
-  color
-}: {
-  title: string
-  value: string
-  subValue?: string
-  icon: string
-  color: string
-}) {
-  return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-slate-500">{title}</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">{value}</p>
-          {subValue && <p className="text-sm text-slate-400 mt-1">{subValue}</p>}
-        </div>
-        <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center text-2xl`}>
-          {icon}
         </div>
       </div>
     </div>

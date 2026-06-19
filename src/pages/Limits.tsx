@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import EmptyState from '../components/EmptyState'
+import Modal from '../components/Modal'
+import ProgressBar from '../components/ProgressBar'
 import { useAppStore } from '../store/useAppStore'
 import { formatDurationShort, getTodayString } from '../utils/format'
 
@@ -119,14 +122,7 @@ export default function Limits() {
                       <span className={`text-sm ${isOver ? 'text-red-500 font-medium' : 'text-slate-600'}`}>
                         {formatDurationShort(usage)}
                       </span>
-                      <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            isOver ? 'bg-red-500' : progress > 80 ? 'bg-amber-500' : 'bg-blue-500'
-                          }`}
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
+                      <ProgressBar value={usage} max={limitSeconds} color={isOver ? 'red' : progress > 80 ? 'amber' : 'blue'} height="h-1.5" className="w-24 mt-1" />
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -174,8 +170,8 @@ export default function Limits() {
             })}
             {limits.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                  暂无限额设置，点击「添加限额」开始配置
+                <td colSpan={6}>
+                  <EmptyState message="暂无限额设置，点击「添加限额」开始配置" className="px-6 py-12" />
                 </td>
               </tr>
             )}
@@ -184,74 +180,23 @@ export default function Limits() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">添加应用限额</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-slate-600 mb-1.5">应用名称</label>
-                <input
-                  type="text"
-                  value={newAppName}
-                  onChange={e => setNewAppName(e.target.value)}
-                  placeholder="输入应用名称，如：哔哩哔哩"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1.5">
-                  每日限额（分钟）
-                </label>
-                <input
-                  type="number"
-                  value={newLimitMinutes}
-                  onChange={e => setNewLimitMinutes(Number(e.target.value))}
-                  min="1"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1.5">超时处理</label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setNewAction('notify')}
-                    className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${
-                      newAction === 'notify'
-                        ? 'border-blue-500 bg-blue-50 text-blue-600'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    仅通知
-                  </button>
-                  <button
-                    onClick={() => setNewAction('lock')}
-                    className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${
-                      newAction === 'lock'
-                        ? 'border-red-500 bg-red-50 text-red-600'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    强制休息
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleAddLimit}
-                className="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
-              >
-                确定
-              </button>
+        <Modal title="添加应用限额" onClose={() => setShowAddModal(false)} onConfirm={handleAddLimit}>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1.5">应用名称</label>
+            <input type="text" value={newAppName} onChange={e => setNewAppName(e.target.value)} placeholder="输入应用名称，如：哔哩哔哩" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1.5">每日限额（分钟）</label>
+            <input type="number" value={newLimitMinutes} onChange={e => setNewLimitMinutes(Number(e.target.value))} min="1" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1.5">超时处理</label>
+            <div className="flex gap-3">
+              <button onClick={() => setNewAction('notify')} className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${newAction === 'notify' ? 'border-blue-500 bg-blue-50 text-blue-600' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>仅通知</button>
+              <button onClick={() => setNewAction('lock')} className={`flex-1 py-2 rounded-lg text-sm border transition-colors ${newAction === 'lock' ? 'border-red-500 bg-red-50 text-red-600' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>强制休息</button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   )

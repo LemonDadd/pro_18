@@ -18,6 +18,9 @@ import {
   Line,
   CartesianGrid
 } from 'recharts'
+import StatCard from '../components/StatCard'
+import ProgressBar from '../components/ProgressBar'
+import EmptyState from '../components/EmptyState'
 
 export default function Stats() {
   const [period, setPeriod] = useState<'week' | 'month'>('week')
@@ -202,29 +205,22 @@ export default function Stats() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">本{periodLabel}总时长</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {formatDuration(thisPeriodTotal)}
-          </p>
-          <p className={`text-sm mt-2 ${periodDiff >= 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-            {periodDiff >= 0 ? '↑' : '↓'} 较{lastPeriodLabel} {Math.abs(Number(periodDiffPercent))}%
-          </p>
-        </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">日均时长</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {formatDuration(Math.round(thisPeriodTotal / Math.min(totalDays, dailyStats.length || 1)))}
-          </p>
-          <p className="text-sm text-slate-400 mt-2">按有记录天数计算</p>
-        </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">活跃天数</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {dailyStats.length} / {totalDays} 天
-          </p>
-          <p className="text-sm text-slate-400 mt-2">本{periodLabel}有使用记录的天数</p>
-        </div>
+        <StatCard
+          title={`本${periodLabel}总时长`}
+          value={formatDuration(thisPeriodTotal)}
+          subValue={`${periodDiff >= 0 ? '↑' : '↓'} 较${lastPeriodLabel} ${Math.abs(Number(periodDiffPercent))}%`}
+          subValueClassName={periodDiff >= 0 ? 'text-red-500' : 'text-emerald-500'}
+        />
+        <StatCard
+          title="日均时长"
+          value={formatDuration(Math.round(thisPeriodTotal / Math.min(totalDays, dailyStats.length || 1)))}
+          subValue="按有记录天数计算"
+        />
+        <StatCard
+          title="活跃天数"
+          value={`${dailyStats.length} / ${totalDays} 天`}
+          subValue={`本${periodLabel}有使用记录的天数`}
+        />
       </div>
 
       {period === 'week' ? (
@@ -346,17 +342,12 @@ export default function Stats() {
                       {formatDurationShort(app.totalSeconds)}
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
-                      style={{ width: `${(app.totalSeconds / maxAppDuration) * 100}%` }}
-                    />
-                  </div>
+                  <ProgressBar value={app.totalSeconds} max={maxAppDuration} />
                 </div>
               </div>
             ))}
             {topApps.length === 0 && (
-              <div className="text-center py-8 text-slate-400">暂无数据</div>
+              <EmptyState message="暂无数据" />
             )}
           </div>
         </div>
@@ -417,15 +408,7 @@ export default function Stats() {
                           {formatDurationShort(cat.seconds)} ({total > 0 ? ((cat.seconds / total) * 100).toFixed(1) : 0}%)
                         </span>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${total > 0 ? (cat.seconds / total) * 100 : 0}%`,
-                            backgroundColor: cat.color
-                          }}
-                        />
-                      </div>
+                      <ProgressBar value={cat.seconds} max={total} customColor={cat.color} />
                     </div>
                   </div>
                 ))

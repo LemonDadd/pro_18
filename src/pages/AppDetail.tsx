@@ -16,6 +16,8 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts'
+import StatCard from '../components/StatCard'
+import EmptyState from '../components/EmptyState'
 
 export default function AppDetail() {
   const { id } = useParams<{ id: string }>()
@@ -137,34 +139,22 @@ export default function AppDetail() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">本周总时长</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {formatDuration(detail?.totalSeconds || 0)}
-          </p>
-        </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">日均时长</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {formatDuration(
-              detail?.days
-                ? Math.round(detail.totalSeconds / detail.days)
-                : 0
-            )}
-          </p>
-        </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">活跃天数</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {detail?.days || 0} 天
-          </p>
-        </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="text-sm text-slate-500">高峰时段</p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
-            {detail?.peakHour >= 0 ? `${detail.peakHour}:00` : '-'}
-          </p>
-        </div>
+        <StatCard
+          title="本周总时长"
+          value={formatDuration(detail?.totalSeconds || 0)}
+        />
+        <StatCard
+          title="日均时长"
+          value={formatDuration(detail?.days ? Math.round(detail.totalSeconds / detail.days) : 0)}
+        />
+        <StatCard
+          title="活跃天数"
+          value={`${detail?.days || 0} 天`}
+        />
+        <StatCard
+          title="高峰时段"
+          value={detail?.peakHour >= 0 ? `${detail.peakHour}:00` : '-'}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -245,7 +235,7 @@ export default function AppDetail() {
               </div>
             ))}
             {mergedTimeline.length === 0 && (
-              <div className="text-center py-8 text-slate-400">今日暂无记录</div>
+              <EmptyState message="今日暂无记录" />
             )}
           </div>
         </div>
@@ -272,10 +262,7 @@ export default function AppDetail() {
               </div>
             ))}
             {(!detail?.topTitles || detail.topTitles.length === 0) && (
-              <div className="text-center py-8 text-slate-400">
-                暂无标题记录
-                <p className="text-xs mt-1">请在设置中开启「记录窗口标题」</p>
-              </div>
+              <EmptyState message="暂无标题记录" description="请在设置中开启「记录窗口标题」" />
             )}
           </div>
         </div>
