@@ -71,9 +71,9 @@ export default function AppDetail() {
     setTimeline(appTimeline)
   }
 
-  const handleCategoryChange = async (categoryId: number | null) => {
-    await window.electronAPI.categories.setApp(appName, categoryId)
-    setSelectedCategory(categoryId)
+  const handleCategoryChange = async (categoryId: number | null | undefined) => {
+    await window.electronAPI.categories.setApp(appName, categoryId ?? null)
+    setSelectedCategory(categoryId ?? null)
     await useAppStore.getState().fetchCategories()
   }
 

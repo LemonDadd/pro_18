@@ -91,7 +91,7 @@ export default function Categories() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {categories.map(cat => {
-          const appCount = getAppCountForCategory(cat.id)
+          const appCount = getAppCountForCategory(cat.id!)
           const usage = getCategoryUsage(cat.name)
 
           return (
@@ -120,7 +120,7 @@ export default function Categories() {
                     ✏️
                   </button>
                   <button
-                    onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                    onClick={() => handleDeleteCategory(cat.id!, cat.name)}
                     className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                   >
                     🗑️

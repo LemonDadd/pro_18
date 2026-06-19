@@ -70,3 +70,49 @@ export interface AppTimelineItem {
   endTime: number
   duration: number
 }
+
+export interface CategoryStat {
+  categoryName: string
+  categoryColor: string
+  totalSeconds: number
+}
+
+export interface TopApp {
+  appName: string
+  totalSeconds: number
+  category?: string
+  categoryColor?: string
+}
+
+export interface AppTopTitle {
+  title: string
+  totalSeconds: number
+}
+
+export interface AppDailyDetail {
+  date: string
+  totalSeconds: number
+}
+
+export interface AppDetail {
+  totalSeconds: number
+  days: number
+  dailyStats: AppDailyDetail[]
+  topTitles: AppTopTitle[]
+  peakHour?: number
+}
+
+export interface CurrentActivity {
+  appName: string
+  windowTitle: string
+  startTime: number
+}
+
+export type SettingsUpdate = Partial<Pick<Settings,
+  | 'recordWindowTitle'
+  | 'windowTitleMaxLength'
+  | 'idleThresholdSeconds'
+  | 'autoStart'
+  | 'paused'
+  | 'blacklistedApps'
+>>

@@ -1,13 +1,22 @@
 import { create } from 'zustand'
+import type {
+  AppDailyStat,
+  Category,
+  AppCategoryRule,
+  AppLimit,
+  Settings,
+  SettingsUpdate,
+  CurrentActivity
+} from '../../shared/types'
 
 interface AppState {
-  todayStats: any[]
+  todayStats: AppDailyStat[]
   todayTotal: number
-  categories: any[]
-  categoryRules: any[]
-  limits: any[]
-  settings: any
-  currentActivity: any
+  categories: Category[]
+  categoryRules: AppCategoryRule[]
+  limits: AppLimit[]
+  settings: Settings | null
+  currentActivity: CurrentActivity | null
   loading: boolean
 
   fetchTodayStats: () => Promise<void>
@@ -15,7 +24,7 @@ interface AppState {
   fetchLimits: () => Promise<void>
   fetchSettings: () => Promise<void>
   fetchCurrentActivity: () => Promise<void>
-  updateSettings: (settings: any) => Promise<void>
+  updateSettings: (settings: SettingsUpdate) => Promise<void>
   refreshAll: () => Promise<void>
 }
 
@@ -80,7 +89,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  updateSettings: async (newSettings: any) => {
+  updateSettings: async (newSettings: SettingsUpdate) => {
     try {
       const settings = await window.electronAPI.settings.update(newSettings)
       set({ settings })

@@ -1,42 +1,59 @@
+import type {
+  AppDailyStat,
+  HourlyStat,
+  DayStat,
+  HeatmapCell,
+  CategoryStat,
+  TopApp,
+  AppTimelineItem,
+  AppDetail,
+  Category,
+  AppCategoryRule,
+  AppLimit,
+  Settings,
+  SettingsUpdate,
+  CurrentActivity
+} from '../shared/types'
+
 export {}
 
 declare global {
   interface Window {
     electronAPI: {
       stats: {
-        today: () => Promise<any[]>
+        today: () => Promise<AppDailyStat[]>
         todayTotal: () => Promise<number>
-        hourly: () => Promise<any[]>
-        week: (startDate: string, endDate: string) => Promise<any[]>
-        heatmap: (startDate: string, endDate: string) => Promise<any[]>
-        category: (date: string) => Promise<any[]>
-        topApps: (startDate: string, endDate: string, limit?: number) => Promise<any[]>
-        monthly: (year: number, month: number) => Promise<any[]>
+        hourly: () => Promise<HourlyStat[]>
+        week: (startDate: string, endDate: string) => Promise<DayStat[]>
+        heatmap: (startDate: string, endDate: string) => Promise<HeatmapCell[]>
+        category: (date: string) => Promise<CategoryStat[]>
+        topApps: (startDate: string, endDate: string, limit?: number) => Promise<TopApp[]>
+        monthly: (year: number, month: number) => Promise<DayStat[]>
       }
       app: {
-        timeline: (date: string, appName?: string) => Promise<any[]>
-        detail: (appName: string, startDate: string, endDate: string) => Promise<any>
+        timeline: (date: string, appName?: string) => Promise<AppTimelineItem[]>
+        detail: (appName: string, startDate: string, endDate: string) => Promise<AppDetail | null>
       }
       categories: {
-        list: () => Promise<any[]>
+        list: () => Promise<Category[]>
         add: (name: string, color: string, icon?: string) => Promise<number>
         update: (id: number, name: string, color: string, icon?: string) => Promise<void>
         remove: (id: number) => Promise<void>
-        rules: () => Promise<any[]>
+        rules: () => Promise<AppCategoryRule[]>
         setApp: (appName: string, categoryId: number | null) => Promise<void>
       }
       limits: {
-        list: () => Promise<any[]>
-        set: (limit: any) => Promise<number>
+        list: () => Promise<AppLimit[]>
+        set: (limit: AppLimit) => Promise<number>
         remove: (appName: string) => Promise<void>
         remaining: (appName: string) => Promise<number>
       }
       settings: {
-        get: () => Promise<any>
-        update: (settings: any) => Promise<any>
+        get: () => Promise<Settings>
+        update: (settings: SettingsUpdate) => Promise<Settings>
       }
       tracker: {
-        current: () => Promise<any>
+        current: () => Promise<CurrentActivity | null>
         isActive: () => Promise<boolean>
       }
       export: {
