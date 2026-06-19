@@ -21,8 +21,10 @@ export default function Dashboard() {
   const todayStats = useAppStore(s => s.todayStats)
   const todayTotal = useAppStore(s => s.todayTotal)
   const currentActivity = useAppStore(s => s.currentActivity)
+  const limits = useAppStore(s => s.limits)
   const fetchTodayStats = useAppStore(s => s.fetchTodayStats)
   const fetchCurrentActivity = useAppStore(s => s.fetchCurrentActivity)
+  const fetchLimits = useAppStore(s => s.fetchLimits)
 
   const [hourlyData, setHourlyData] = useState<any[]>([])
   const [categoryData, setCategoryData] = useState<any[]>([])
@@ -32,7 +34,7 @@ export default function Dashboard() {
   }, [])
 
   const loadData = async () => {
-    await Promise.all([fetchTodayStats(), fetchCurrentActivity()])
+    await Promise.all([fetchTodayStats(), fetchCurrentActivity(), fetchLimits()])
 
     const [hourly, category] = await Promise.all([
       window.electronAPI.stats.hourly(),
@@ -61,6 +63,32 @@ export default function Dashboard() {
 
   const categoryColors = categoryData.map(c => c.categoryColor || '#6b7280')
 
+  const limitWarnings = limits
+    .filter(limit => limit.enabled)
+    .map(limit => {
+      const stat = todayStats.find(s => s.appName === limit.appName)
+      const used = stat?.totalDuration || 0
+      const limitSeconds = limit.dailyLimitMinutes * 60
+      const remaining = Math.max(0, limitSeconds - used)
+      const usagePercent = limitSeconds > 0 ? (used / limitSeconds) * 100 : 0
+
+      let status: 'normal' | 'warning' | 'danger' = 'normal'
+      if (usagePercent >= 100) status = 'danger'
+      else if (usagePercent >= 90) status = 'warning'
+
+      return {
+        appName: limit.appName,
+        used,
+        limit: limitSeconds,
+        remaining,
+        usagePercent,
+        status,
+        action: limit.action
+      }
+    })
+    .filter(w => w.status !== 'normal')
+    .sort((a, b) => b.usagePercent - a.usagePercent)
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -82,6 +110,43 @@ export default function Dashboard() {
           🔄 刷新
         </button>
       </div>
+
+      {limitWarnings.length > 0 && (
+        <div className="space-y-2">
+          {limitWarnings.map(warning => (
+            <div
+              key={warning.appName}
+              className={`flex items-center justify-between px-5 py-4 rounded-2xl cursor-pointer transition-transform hover:scale-[1.01] ${
+                warning.status === 'danger'
+                  ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                  : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white'
+              }`}
+              onClick={() => navigate(`/apps/${encodeURIComponent(warning.appName)}`)}
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">
+                  {warning.status === 'danger' ? '🚨' : '⚠️'}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{warning.appName}</h3>
+                  <p className="text-sm opacity-90">
+                    {warning.status === 'danger'
+                      ? `已超过今日限额！已使用 ${formatDurationShort(warning.used)} / ${formatDurationShort(warning.limit)}`
+                      : `剩余 ${formatDurationShort(warning.remaining)}，即将达到今日限额`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold">{warning.usagePercent.toFixed(0)}%</p>
+                <p className="text-xs opacity-80">
+                  {warning.action === 'lock' ? '强制休息模式' : '仅通知模式'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {currentActivity && (
         <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl p-6 text-white">
